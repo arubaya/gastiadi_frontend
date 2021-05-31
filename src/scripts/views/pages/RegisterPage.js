@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 import { NavLink, useHistory } from 'react-router-dom';
 import Cookies from 'js-cookie';
@@ -7,15 +7,17 @@ import {
   Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField,
 } from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { userLogin } from '../../data/User';
+import { userLogin, userName, userRole } from '../../data/User';
 import apiClient from '../../data/api';
 import Logo from '../../../images/logo.png';
+import { Autocomplete } from '@material-ui/lab';
 
 function RegisterPage() {
   const [name, setName] = useState('');
+  const [cs_region_id, setCsRegionId] = useState(0);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [regionList, setRegionList] = useState(['none']);
 
   const [errorEmail, setErrorEmail] = useState(false);
   const [errorPassword, setErrorPassword] = useState(false);
@@ -26,6 +28,8 @@ function RegisterPage() {
   const [open, setOpen] = useState(false);
   const [loginProgress, setLoginProgress] = useState(false);
 
+  const setUserName = useSetRecoilState(userName);
+  const setRole = useSetRecoilState(userRole);
   const setAuth = useSetRecoilState(userLogin);
   const history = useHistory();
 
@@ -34,32 +38,40 @@ function RegisterPage() {
     history.push('/');
   };
 
+  useEffect(() => {
+    apiClient.get('/regions')
+    .then((res) => {
+      // console.log(res.data.result)
+      setRegionList(res.data.result)
+    }).catch((error) => {
+      console.log(error);
+    });
+  }, [])
+
   const submitHandler = (e) => {
     e.preventDefault();
     setLoginProgress(true);
-    console.log(name, email, password);
-    apiClient.get('/sanctum/csrf-cookie').then(() => {
-      apiClient.post('/register', {
-        role: 'user',
-        name,
-        email,
-        password,
-        confirm_password: confirmPassword,
-      }).then((res) => {
-        console.log(res);
-        if (res.status === 200) {
-          setAuth(true);
-          Cookies.set('loggedIn', true);
-          Cookies.set('id', res.data.user.id);
-          Cookies.set('role', res.data.user.role);
-          setLoginProgress(false);
-          setOpen(true);
-          // history.push('/user');
-        }
-      }).catch((res) => {
+
+    apiClient.post('/addcs', {
+      name,
+      email,
+      password,
+      cs_region_id,
+    }).then((res) => {
+      // console.log(res.data);
+      if (res.status === 201) {
+        setAuth(true);
+        Cookies.set('loggedIn', true);
+        Cookies.set('id', res.data.data.id);
+        Cookies.set('role', res.data.data.role_id);
+        setUserName(res.data.data.name)
+        setRole(Cookies.get('role'));
         setLoginProgress(false);
-        console.log(res);
-      });
+        setOpen(true);
+      }
+    }).catch((res) => {
+      setLoginProgress(false);
+      console.log(res);
     });
   };
 
@@ -99,14 +111,14 @@ function RegisterPage() {
       if (e.target.value === '') {
         setErrorConfirmPassword(false);
         setErrTextConfirmPassword('');
-        setConfirmPassword(e.target.value);
+        // setConfirmPassword(e.target.value);
       } else if (e.target.value !== password) {
         setErrorConfirmPassword(true);
         setErrTextConfirmPassword('Your password not same');
       } else {
         setErrorConfirmPassword(false);
         setErrTextConfirmPassword('');
-        setConfirmPassword(e.target.value);
+        // setConfirmPassword(e.target.value);
       }
     }
   };
@@ -138,6 +150,16 @@ function RegisterPage() {
               error={errorEmail}
               helperText={errTextEmail}
               onChange={(e) => checkValidate(e, 'email')}
+            />
+            <Autocomplete
+              id="filledRegion"
+              options={regionList}
+              getOptionLabel={(region) => region.name}
+              onChange={(e, value, r) => setCsRegionId(value.id)}
+              renderInput={(params) => 
+              <TextField {...params} 
+              label="Kabupaten/Kota" 
+              />}
             />
             <TextField
               id="filledPassword"

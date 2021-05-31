@@ -2,7 +2,7 @@ import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import Authenticated from '../middleware/Authenticated';
 import CsRoute from '../middleware/CsRoute';
-import AdminRoute from '../middleware/AdminRoute';
+// import AdminRoute from '../middleware/AdminRoute';
 import Navbar from '../views/components/Navbar';
 import HomePage from '../views/pages/HomePage';
 import LoginPage from '../views/pages/LoginPage';
@@ -28,10 +28,10 @@ function Router() {
         </Authenticated>
       </Route>
       <Route exact path="/cs/dashboard/:roomid">
-        {/* <CsRoute> */}
+        <CsRoute>
           <Navbar />
           <CsDashboardPage />
-        {/* </CsRoute> */}
+        </CsRoute>
       </Route>
       <Route exact path="*">
         <Redirect from="*" to="/" />

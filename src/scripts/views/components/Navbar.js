@@ -1,12 +1,26 @@
 import { Button } from '@material-ui/core';
 import React from 'react'
-import { useRecoilValue } from 'recoil';
-import { userName } from '../../data/User';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { userName, userLogin } from '../../data/User';
 
 import Logo from '../../../images/logo.png';
+import Cookies from 'js-cookie';
+import { useHistory } from 'react-router';
 
 function Navbar() {
   const name = useRecoilValue(userName)
+  const setAuth = useSetRecoilState(userLogin);
+  const history = useHistory();
+
+  const logoutHandler = () => {
+    setAuth(false);
+    Cookies.set('loggedIn', false);
+    Cookies.remove('id');
+    Cookies.remove('role');
+    Cookies.remove('token');
+    // ws.close();
+    history.push('/');
+  } 
 
   return (
     <header id="header">
@@ -25,6 +39,7 @@ function Navbar() {
         variant="outlined"
         size="small" 
         disableElevation 
+        onClick={() => logoutHandler()}
         color="primary">
           Keluar
         </Button>

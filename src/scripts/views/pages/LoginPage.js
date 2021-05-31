@@ -8,7 +8,6 @@ import Cookies from 'js-cookie';
 import apiClient from '../../data/api';
 import { userLogin, userRole, userName } from '../../data/User';
 import Logo from '../../../images/logo.png';
-import { data } from 'jquery';
 
 function LoginPage() {
   const [email, setEmail] = useState('');

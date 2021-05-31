@@ -146,7 +146,7 @@
   word-wrap: break-word;
 }
 
-.message-container.receiver {
+.message-container.sender {
   margin-left: auto;
 }
 
@@ -157,7 +157,7 @@
   margin: 5px 7px;
 }
 
-.message-name.receiver {
+.message-name.sender {
   margin-left: auto;
 }
 
@@ -175,7 +175,7 @@
   /* border: 1px solid #fc5454; */
 }
 
-.message.receiver {
+.message.sender {
   background-color: #fc5454;
   color: #fff;
   border: none;
@@ -188,7 +188,7 @@
   font-size: xx-small;
 }
 
-.timestamp.receiver {
+.timestamp.sender {
   color: #fff;
 }
 

@@ -8,13 +8,12 @@ function Authenticated(props) {
   const history = useHistory();
 
   if (auth) {
-    if (Cookies.get('role') === 'admin') {
+    if (Cookies.get('role') === '1') {
       history.push('/admin/dashboard');
-    } else if (Cookies.get('role') === 'user') {
-      history.push('/user');
+    } else if (Cookies.get('role') === '2') {
+      history.push('/cs/dashboard/start');
     }
   }
-  console.log(Cookies.get('role'));
 
   return props.children;
 }

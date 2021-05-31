@@ -1,15 +1,37 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import TelegramIcon from '@material-ui/icons/Telegram';
 import SendIcon from '@material-ui/icons/Send';
 import { Avatar, Button, IconButton, List, ListItem, TextField } from '@material-ui/core';
 import { green, grey } from '@material-ui/core/colors';
-import { useParams } from 'react-router';
+import { useHistory, useParams } from 'react-router';
+import Ws from '@adonisjs/websocket-client';
 import { useRecoilValue } from 'recoil';
-// import { userName } from '../../data/User';
+import { userId, userName } from '../../data/User';
+import Cookies from 'js-cookie';
+
+const ws = Ws('ws://localhost:8080/', {
+  path: "gastiadi-ws",
+})
+
+const chat = ws.subscribe(`chat`)
 
 function CsDashboardPage() {
   const {roomid} = useParams();
   const [noChatActive, setNoChatActive] = useState(false);
+  const [chats, setChats] = useState([])
+  const [messages, setMessages] = useState([])
+  const [receiverName, setReceiverName] = useState('')
+  const [message, setMessage] = useState('')
+  const userID = Cookies.get('id');
+  const name = useRecoilValue(userName);
+
+  const history = useHistory();
+  const ref = useRef()
+
+  const getTimestamp = (time) => {
+    const res = time.substr(0, 16)
+    return res;
+  }
 
   useEffect(() => {
     if(roomid === "start") {
@@ -18,6 +40,50 @@ function CsDashboardPage() {
       setNoChatActive(false);
     }
   }, [roomid])
+
+
+  useEffect(() => {
+    ws.connect();
+    chat.emit('init_chat', {id: userID})
+    chat.on('messages', (data) => {
+      console.log(data);
+      setMessages(data)
+      scrollToBottom()
+    })
+    chat.on('init_chat', (data) => {
+      setChats(data)
+    })
+    chat.on('init_messages', (data) => {
+      console.log(data);
+      setMessages(data)
+      scrollToBottom()
+    })
+    
+  }, [])
+
+  const openChat = (id, name) => {
+    setReceiverName(name);
+    history.push(`/cs/dashboard/${id}`);
+    chat.emit('join_room', {room_id: id})
+    scrollToBottom()
+  }
+
+  const sendMessage = (e) => {
+    e.preventDefault();
+    const input = document.getElementById('chatMessageInput')
+    input.value = null;
+    setMessage('')
+    chat.emit('send_message', {
+      room_id: roomid,
+      name,
+      user_id: userID,
+      message
+    })
+  }
+
+  const scrollToBottom = () => {
+    ref.current.scrollIntoView({ block: 'end' })
+  }
 
   const greenColor = {
     color: '#fff',
@@ -43,40 +109,34 @@ function CsDashboardPage() {
             <h4>Customer Service Chat</h4>
           </div>
           <List id="chatList">
-            <ListItem className="chats" button>
-              <div className="avatar-container">
-                <Avatar style={greenColor}>J</Avatar>
-              </div>
-              <div className="text-container">
-                <p className="name">Joko</p>
-                <p className="chat-status">active</p>
-              </div>
-              <div className="chat-line" />
-            </ListItem>
-
-            <ListItem className="chats" button>
-              <div className="avatar-container">
-                <Avatar style={greyColor}>TA</Avatar>
-              </div>
-              <div className="text-container">
-                <p className="name">Tsabit Arubaya</p>
-                <p className="chat-status pending">pending</p>
-              </div>
-              <div className="chat-line" />
-            </ListItem>                      
+            {chats.map((data) => (
+              <ListItem key={data.id} className="chats" button onClick={() => openChat(data.id, data.name)}>
+                <div className="avatar-container">
+                  <Avatar style={greyColor}></Avatar>
+                </div>
+                <div className="text-container">
+                  <p className="name">{data.name}</p>
+                  <p className="chat-status">{data.status}</p>
+                </div>
+                <div className="chat-line" />
+              </ListItem>
+            ))}
           </List>
 
         </section>
         {noChatActive? (
           <section id="noChatActiveContainer">
             <p>Anda belum memulai percakapan. Silahkan klik salah satu pesan di samping.</p>
+            <div style={{ float:"left", clear: "both" }}
+              ref={ref}>
+            </div>
           </section>
         ) : (
           <section id="chatRoomContainer">
             <div className="chat-title-container">
               <div className="chat-title-name">
-                <Avatar style={greenColor}>J</Avatar>
-                <p className="user-name">Joko</p>
+                <Avatar style={greyColor}></Avatar>
+                <p className="user-name">{receiverName}</p>
               </div>
               <Button
               color="primary"
@@ -87,32 +147,24 @@ function CsDashboardPage() {
               </Button>
             </div>
             <div className="chat-content-container">
-              <div className='message-container receiver'>
-                  <p className='message-name receiver'>
-                      Tsabit Arubaya
-                  </p>
-                  <div className='message receiver'>
-                      Ada yang bisa saya bantu?
-                      <p className="timestamp receiver">
-                        20.22, 23 Mei 2021
-                      </p>
-                  </div>
+              {messages.map((data, index) => (
+                <div key={index} className={`message-container ${data.user_id === userID ? "sender" : ""}`}>
+                    <p className={`message-name ${data.user_id === userID ? "sender" : ""}`}>
+                        {data.name}
+                    </p>
+                    <div className={`message ${data.user_id === userID ? "sender" : ""}`}>
+                        {data.message}
+                        <p className={`timestamp ${data.user_id === userID ? "sender" : ""}`}>
+                          {getTimestamp(data.created_at)}
+                        </p>
+                    </div>
+                </div>
+              ))}
+              <div style={{ float:"left", clear: "both" }}
+                ref={ref}>
               </div>
-
-              <div className='message-container'>
-                  <p className='message-name'>
-                    Joko
-                  </p>
-                  <div className='message'>
-                      Gak ada sih hehe
-                      <p className="timestamp">
-                        20.23, 23 Mei 2021
-                      </p>
-                  </div>
-              </div>
-
             </div>
-            <form className="chat-send-message-container">
+            <form className="chat-send-message-container" onSubmit={sendMessage}>
               <TextField
                   className="input-message-container"
                   id="chatMessageInput"
@@ -121,6 +173,7 @@ function CsDashboardPage() {
                   rowsMax={3}
                   color="primary"
                   fullWidth
+                  onChange={(e) => setMessage(e.target.value)}
                   size="small"
                   variant="outlined"
                 />

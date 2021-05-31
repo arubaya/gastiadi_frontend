@@ -16,7 +16,6 @@ function AdminRoute(props) {
       history.push('/cs/dashboard');
     }
   }
-  // console.log(Cookies.get('role'));
 
   return props.children;
 }
