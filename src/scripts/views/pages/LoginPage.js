@@ -34,20 +34,15 @@ function LoginPage() {
       }).then((res) => {
         console.log(res.data.data[0]);
         if (res.status === 200) {
-          if (res.data.data[0].role_id === 3) {
-            history.push('/')
-          } else {
-            setAuth(true);
-            Cookies.set('loggedIn', true);
-            Cookies.set('id', res.data.data[0].id);
-            Cookies.set('role', res.data.data[0].role_id);
-            Cookies.set('token', `Bearer ${res.data.token.token}`);
-            setUserName(res.data.data[0].name)
-            setRole(Cookies.get('role'));
-            setLoginProgress(false);
-            history.push('/cs/dashboard/start')
-            
-          }
+          setAuth(true);
+          Cookies.set('loggedIn', true);
+          Cookies.set('id', res.data.data[0].id);
+          Cookies.set('role', res.data.data[0].role_id);
+          Cookies.set('token', `Bearer ${res.data.token.token}`);
+          setUserName(res.data.data[0].name)
+          setRole(Cookies.get('role'));
+          setLoginProgress(false);
+          // history.push('/')
         }
       }).catch((res) => {
         console.log(res);

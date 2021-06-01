@@ -3,21 +3,23 @@ import { useRecoilValue } from 'recoil';
 import Cookies from 'js-cookie';
 import { userLogin } from '../data/User';
 
-function Authenticated(props) {
+function UserRoute(props) {
   const auth = useRecoilValue(userLogin);
   const history = useHistory();
 
+  if (!auth) {
+    history.push('/login');
+  }
+
   if (auth) {
     if (Cookies.get('role') === '1') {
-      history.push('/admin/dashboard');
+      history.push('/');
     } else if (Cookies.get('role') === '2') {
       history.push('/cs/dashboard/start');
-    } else if (Cookies.get('role') === '3') {
-      history.push('/user/dashboard/start');
     }
   }
 
   return props.children;
 }
 
-export default Authenticated;
+export default UserRoute;

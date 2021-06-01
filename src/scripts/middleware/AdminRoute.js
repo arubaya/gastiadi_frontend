@@ -13,7 +13,9 @@ function AdminRoute(props) {
 
   if (auth) {
     if (Cookies.get('role') === '2') {
-      history.push('/cs/dashboard');
+      history.push('/cs/dashboard/start');
+    } else if (Cookies.get('role') === '3') {
+      history.push('/user/dashboard/start');
     }
   }
 

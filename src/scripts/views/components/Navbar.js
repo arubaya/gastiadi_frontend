@@ -6,6 +6,12 @@ import { userName, userLogin } from '../../data/User';
 import Logo from '../../../images/logo.png';
 import Cookies from 'js-cookie';
 import { useHistory } from 'react-router';
+import Ws from '@adonisjs/websocket-client';
+
+// const ws = Ws('ws://192.168.1.12:8080/', {
+//   path: "gastiadi-ws",
+// })
+// const chat = ws.subscribe(`chat`)
 
 function Navbar() {
   const name = useRecoilValue(userName)
@@ -18,7 +24,6 @@ function Navbar() {
     Cookies.remove('id');
     Cookies.remove('role');
     Cookies.remove('token');
-    // ws.close();
     history.push('/');
   } 
 

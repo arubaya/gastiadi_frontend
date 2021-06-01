@@ -214,3 +214,12 @@
 .button-send-message {
   margin: 0 20px 0 10px !important;
 }
+
+#createChat {
+  width: 100%;
+  height: calc(100% - 50px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}

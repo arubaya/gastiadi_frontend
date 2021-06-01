@@ -14,6 +14,8 @@ function CsRoute(props) {
   if (auth) {
     if (Cookies.get('role') === '1') {
       history.push('/admin/dashboard');
+    } else if (Cookies.get('role') === '3') {
+      history.push('/user/dashboard/start');
     }
   }
 
