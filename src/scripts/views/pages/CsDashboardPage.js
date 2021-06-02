@@ -78,7 +78,6 @@ function CsDashboardPage() {
       name,
       user_id: userID,
       message,
-      bot_message: -1
     })
   }
 

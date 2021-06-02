@@ -21,14 +21,8 @@ function UserDashboardPage() {
   const {roomid} = useParams();
   const [noChatActive, setNoChatActive] = useState(false);
   const [receiverName, setReceiverName] = useState('')
-  const [messages, setMessages] = useState([{
-    user_id: '',
-    name: receiverName,
-    message: 'Halo, selamat datang di Gastiadi. Ada yang bisa kami bantu?',
-    created_at: '-------------------------'
-  }])
+  const [messages, setMessages] = useState([])
   const [message, setMessage] = useState('')
-  const [count, setCount] = useState(0)
   const userID = Cookies.get('id');
   const name = useRecoilValue(userName);
 
@@ -46,10 +40,8 @@ function UserDashboardPage() {
   useEffect(() => {
     if(roomid === "start") {
       setNoChatActive(true);
-      setCount(0)
     } else {
       setNoChatActive(false);
-      setCount(-1)
     }
   }, [roomid])
 
@@ -106,9 +98,8 @@ function UserDashboardPage() {
         cs_id = res.data.data.cs_id;
       }
       chat.emit('init_chat', {id: cs_id})
-      history.push(`/cs/dashboard/${roomId}`);
       chat.emit('join_room', {room_id: roomId})
-      scrollToBottom()
+      history.push(`/cs/dashboard/${roomId}`);
     })
   }
 
@@ -122,7 +113,6 @@ function UserDashboardPage() {
       name,
       user_id: userID,
       message,
-      bot_message: count
     })
   }
 
